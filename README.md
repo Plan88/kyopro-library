@@ -1,5 +1,7 @@
 # 競プロライブラリ管理用ドキュメント
 
+[GitHub Pages](https://plan88.github.io/kyopro-library/)
+
 ## install
 ```shell
 $ poetry install
