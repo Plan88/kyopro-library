@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "cp-library"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+mkdocs = "^1.5.3"
+mkdocs-material = "^9.5.13"
+mkdocs-git-revision-date-plugin = "^0.3.2"
+mkdocs-open-in-new-tab = "^1.0.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
