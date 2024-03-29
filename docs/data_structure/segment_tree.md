@@ -104,3 +104,85 @@ template <class S, S (*op)(S, S), S (*e)()> struct SegmentTree {
     }
 };
 ```
+
+## Rust
+```Rust
+pub mod segtree {
+    pub trait Monoid {
+        fn e() -> Self;
+        fn op(&self, rhs: Self) -> Self;
+    }
+
+    pub struct SegmentTree<T> {
+        n: usize,
+        val: Vec<T>,
+    }
+
+    impl<T: Monoid + Copy> SegmentTree<T> {
+        pub fn from_length(n: usize) -> Self {
+            let val = vec![T::e(); n];
+            Self::build(val)
+        }
+
+        pub fn from_array(v: &[T]) -> Self {
+            let val = v.to_vec();
+            Self::build(val)
+        }
+
+        fn build(v: Vec<T>) -> Self {
+            let m = v.len();
+            let mut n = 1;
+            while n < m {
+                n <<= 1;
+            }
+
+            let mut val = vec![T::e(); n]; // n
+            val.extend(v); // n + m
+            val.extend(vec![T::e(); n - m]); // 2n
+
+            for i in (1..n).rev() {
+                let l = i << 1 + 0;
+                let r = (i << 1) + 1;
+                val[i] = val[l].op(val[r]);
+            }
+
+            Self { n, val }
+        }
+
+        pub fn get(&self, pos: usize) -> T {
+            self.val[pos + self.n]
+        }
+
+        pub fn set(&mut self, pos: usize, x: T) {
+            let mut i = pos + self.n;
+            self.val[i] = x;
+            while i > 1 {
+                i >>= 1;
+                let l = i << 1 + 0;
+                let r = (i << 1) + 1;
+                self.val[i] = self.val[l].op(self.val[r]);
+            }
+        }
+
+        pub fn prod(&self, mut l: usize, mut r: usize) -> T {
+            l += self.n;
+            r += self.n;
+            let mut v = T::e();
+            while l < r {
+                if (l & 1) == 1 {
+                    v = v.op(self.val[l]);
+                    l += 1;
+                }
+                if (r & 1) == 1 {
+                    r -= 1;
+                    v = v.op(self.val[r]);
+                }
+                l >>= 1;
+                r >>= 1;
+            }
+
+            v
+        }
+    }
+}
+```
