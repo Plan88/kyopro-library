@@ -23,3 +23,34 @@ vector<pair<long long, int>> factorize(long long n){
     return res;
 }
 ```
+
+## Rust
+```Rust
+fn factorize(mut x: u64) -> Vec<(u64, u64)> {
+    let mut fact = vec![];
+    let sqrt = x.sqrt();
+
+    let mut divide = |p| {
+		let mut count = 0;
+		while x % p == 0 {
+			x /= p;
+			count += 1;
+		}
+		if count > 0 {
+			fact.push((p, count));
+		}
+    };
+
+    divide(2);
+
+    for p in (3..=sqrt).step_by(2) {
+		divide(p);
+    }
+
+    if x > 1 {
+		fact.push((x, 1));
+    }
+
+    fact
+}
+```
