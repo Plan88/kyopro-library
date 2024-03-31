@@ -26,3 +26,6 @@ vector<int> z_algorithm(string s) {
     return z_algorithm(v);
 }
 ```
+
+## Example
+- [ABC343 G - Compress Strings (C++)](https://atcoder.jp/contests/abc343/submissions/51251836)
