@@ -19,7 +19,7 @@ struct FastRNG {
     }
 
     template <class T>
-    unsigned long long gen(T l, T r) {
+    T gen(T l, T r) {
         // generate random number in [l, r]
         return l + gen() % (r - l + 1);
     }
