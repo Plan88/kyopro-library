@@ -1,6 +1,6 @@
-## c++
+## C++
 ```c++
-bool isPrime(long long num) {
+bool is_prime(long long num) {
     if (num < 2) return false;
     else if (num == 2) return true;
     else if (num % 2 == 0) return false; // 偶数はあらかじめ除く

@@ -1,7 +1,7 @@
-## c++
+## C++
 ```c++
 struct SieveEratosthenes{
-    vector<int> min_fact;
+    std::vector<int> min_fact;
 
     SieveEratosthenes(int N){
         _build(N);
@@ -25,8 +25,8 @@ struct SieveEratosthenes{
         return min_fact[x] == x;
     }
 
-    vector<pair<int,int>> factorize(int x){
-        vector<pair<int,int>> ret;
+    std::vector<std::pair<int,int>> factorize(int x){
+        std::vector<std::pair<int,int>> ret;
         while(x>1){
             if(ret.empty() || ret.back().first != min_fact[x])
                 ret.emplace_back(min_fact[x], 1);

@@ -1,7 +1,7 @@
-## c++
+## C++
 ```c++
-vector<pair<long long, int>> factorize(long long n){
-    vector<pair<long long, int>> res;
+std::vector<std::pair<long long, int>> factorize(long long n){
+    std::vector<std::pair<long long, int>> res;
     
     if(n%2 == 0){
         res.emplace_back(2,0);
