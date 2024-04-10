@@ -1,4 +1,5 @@
-## c++
+## C++
+$\mathcal{O}(\log N)$
 ```c++
 int l = 1;
 while(l<=N){
