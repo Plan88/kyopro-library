@@ -30,3 +30,7 @@ std::vector<int> z_algorithm(std::string &s) {
 
 ## Example
 - [ABC343 G - Compress Strings (C++)](https://atcoder.jp/contests/abc343/submissions/51251836)
+
+## Reference
+
+- [https://sen-comp.hatenablog.com/entry/2020/01/16/174230](https://sen-comp.hatenablog.com/entry/2020/01/16/174230)
