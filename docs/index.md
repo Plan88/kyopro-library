@@ -220,7 +220,7 @@
 | Title                    | Status             | Submission                                                   |
 |--------------------------|:------------------:|:------------------------------------------------------------:|
 | Z Algorithm              | :white_check_mark: | <a href="https://judge.yosupo.jp/submission/202058">link</a> |
-| Enumerate Palindromes    |                    |                                                              |
+| Enumerate Palindromes    | :white_check_mark: | <a href="https://judge.yosupo.jp/submission/202308">link</a> |
 | Suffix Array             |                    |                                                              |
 | Number of Substrings     |                    |                                                              |
 | Run Enumerate            |                    |                                                              |
