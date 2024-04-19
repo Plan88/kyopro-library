@@ -306,3 +306,7 @@ struct DynamicRollingHash {
     }
 };
 ```
+
+## Example
+
+- [ABC331 F - Palindrome Query (C++)](https://atcoder.jp/contests/abc331/submissions/52514217)
