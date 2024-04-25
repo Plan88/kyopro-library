@@ -5,11 +5,7 @@ use domain::State;
 use problem_io::Input;
 
 const TURN: usize = 49;
-const TAKE: usize = 1000;
-const WEIGHT: f64 = 0.001;
 const BEAM_WIDTH: usize = 200;
-const MAX_COMPOSITION: usize = 6;
-const ALLOW_COMPOSITION: usize = 3;
 
 fn main() {
     let input = Input::new();
