@@ -26,7 +26,8 @@ std::vector<int> z_algorithm(std::string &s) {
     for (int i = 0; i < n; i++)
         v[i] = s[i];
     return z_algorithm(v);
-}```
+}
+```
 
 ## Example
 - [ABC343 G - Compress Strings (C++)](https://atcoder.jp/contests/abc343/submissions/51251836)
