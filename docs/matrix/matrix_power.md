@@ -1,6 +1,6 @@
 calculate
 
-$$A^k\boldsymbol{x},\ A \in \mathbb{R}^{N\times N},\ \boldsymbol{x} \in \mathbb{R}^{N \times 1},\ k \in \mathbb{N}$$
+$$A^k\boldsymbol{x},\ A \in \mathbb{R}^{N\times N},\ \boldsymbol{x} \in \mathbb{R}^{N},\ k \in \mathbb{N}$$
 
 **constraints**
 
@@ -13,24 +13,49 @@ $$A^k\boldsymbol{x},\ A \in \mathbb{R}^{N\times N},\ \boldsymbol{x} \in \mathbb{
 ## C++
 ```c++
 template<class T>
-std::vector<std::vector<T>> matdot(std::vector<std::vector<T>>& A, std::vector<std::vector<T>>& B){
-    int n = A.size(), m = B.size(), l = B[0].size();
-    std::vector<std::vector<T>> ret(n, std::vector<T>(l,0));
+std::vector<T> matmul(std::vector<std::vector<T>> &A, std::vector<T> &v) {
+    int n = A.size(), m = v.size();
+    std::vector<T> ret(n, 0);
 
-    for(int i=0; i<n; i++)
-        for(int j=0; j<l; j++)
-            for(int k=0; k<m; k++)
-                ret[i][j] += A[i][k]*B[k][j];
+    for(int i = 0; i < n; i++)
+        for(int j = 0; j < m; j++)
+            ret[i] += A[i][j] + v[j];
 
     return ret;
 }
 
 template<class T>
-void matpow(std::vector<std::vector<T>>& dp, std::vector<std::vector<T>>& mat, long long k){
+std::vector<std::vector<T>> matmul(std::vector<std::vector<T>> &A, std::vector<std::vector<T>> &B){
+    int n = A.size(), m = B.size(), l = B[0].size();
+    std::vector<std::vector<T>> ret(n, std::vector<T>(l,0));
+
+    for(int i = 0; i < n; i++)
+        for(int k = 0; k < m; k++)
+            for(int j = 0; j < l; j++)
+                ret[i][j] += A[i][k] * B[k][j];
+
+    return ret;
+}
+
+template<class T>
+std::vector<std::vector<T>> matpow(std::vector<std::vector<T>> &mat, long long k){
+    int n = mat.size();
+    std::vector<std::vector<T>> ret(n, std::vector<T>(n, 0));
+    for(int i = 0; i < n; i++)
+        ret[i][i] = 1;
+
     while(k){
-        if(k & 1) dp = matdot(mat, dp);
-        mat = matdot(mat, mat);
+        if(k & 1) ret = matmul(mat, ret);
+        mat = matmul(mat, mat);
         k >>= 1;
     }
+
+    return ret;
 }
 ```
+
+## Example
+
+- [ABC009 D - 漸化式 (C++)](https://atcoder.jp/contests/abc009/submissions/53032473)
+- [ABC236 G - Good Vertices (C++)](https://atcoder.jp/contests/abc236/submissions/53032371)
+- [Educational DP Contest R - Walk (C++)](https://atcoder.jp/contests/dp/submissions/53031726)
