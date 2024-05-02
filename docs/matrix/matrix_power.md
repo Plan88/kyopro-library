@@ -25,7 +25,7 @@ std::vector<T> matmul(std::vector<std::vector<T>> &A, std::vector<T> &v) {
 }
 
 template<class T>
-std::vector<std::vector<T>> matmul(std::vector<std::vector<T>> &A, std::vector<std::vector<T>> &B){
+std::vector<std::vector<T>> matmul(std::vector<std::vector<T>> &A, std::vector<std::vector<T>> &B) {
     int n = A.size(), m = B.size(), l = B[0].size();
     std::vector<std::vector<T>> ret(n, std::vector<T>(l,0));
 
@@ -38,14 +38,21 @@ std::vector<std::vector<T>> matmul(std::vector<std::vector<T>> &A, std::vector<s
 }
 
 template<class T>
-std::vector<std::vector<T>> matpow(std::vector<std::vector<T>> &mat, long long k){
+std::vector<std::vector<T>> matpow(std::vector<std::vector<T>> &mat, long long k) {
     int n = mat.size();
-    std::vector<std::vector<T>> ret(n, std::vector<T>(n, 0));
-    for(int i = 0; i < n; i++)
-        ret[i][i] = 1;
+    bool first = true;
+    // k == 0 のときは明示的に単位行列で初期化する必要がある
+    std::vector<std::vector<T>> ret;
 
     while(k){
-        if(k & 1) ret = matmul(mat, ret);
+        if(k & 1) {
+            if(first) {
+                ret = mat;
+                first = false;
+            } else {
+                ret = matmul(mat, ret);
+            }
+        }
         mat = matmul(mat, mat);
         k >>= 1;
     }
