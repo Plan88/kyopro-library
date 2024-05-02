@@ -28,6 +28,8 @@ pub mod problem_io {
 }
 
 pub mod domain {
+    use super::problem_io::Input;
+
     pub type Score = f64;
     pub type Action = Option<()>;
 
@@ -36,7 +38,7 @@ pub mod domain {
 
     impl State {
         /// 初期状態の生成
-        pub fn new(input: Input) -> State {
+        pub fn new(input: Input) -> Self {
             todo!();
         }
 
