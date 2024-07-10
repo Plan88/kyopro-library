@@ -1,4 +1,4 @@
-## c++
+## C++
 ```c++
 template <class S,
           S (*op)(S, S),
@@ -173,3 +173,199 @@ struct LazySegmentTree {
     }
 };
 ```
+
+## Rust
+```rust
+pub mod data_structure {
+    pub trait Monoid {
+        fn e() -> Self;
+        fn op(&self, rhs: Self) -> Self;
+    }
+
+    pub trait Operator<T: Monoid> {
+        fn mapping(&self, x: T) -> T;
+        fn composition(&self, rhs: Self) -> Self;
+    }
+
+    pub struct LazySegmentTree<T, U> {
+        n: usize,     // length of leaf node
+        depth: usize, // depth of tree, root's depth is 1
+        val: Vec<T>,
+        lazy: Vec<Option<U>>,
+    }
+
+    impl<T: Monoid + Copy, U: Operator<T> + Copy> LazySegmentTree<T, U> {
+        pub fn from_length(n: usize) -> Self {
+            let val = vec![T::e(); n];
+            Self::build(val)
+        }
+
+        pub fn from_array(v: &[T]) -> Self {
+            let val = v.to_vec();
+            Self::build(val)
+        }
+
+        fn build(v: Vec<T>) -> Self {
+            let m = v.len();
+            let n = bit_ceil(m);
+            let depth = bit_width(n);
+
+            let mut val = vec![T::e(); n]; // n
+            val.extend(v); // n + m
+            val.extend(vec![T::e(); n - m]); // 2n
+
+            for i in (1..n).rev() {
+                let l = i << 1 + 0;
+                let r = (i << 1) + 1;
+                val[i] = val[l].op(val[r]);
+            }
+
+            let lazy = vec![None; n];
+
+            Self {
+                n,
+                depth,
+                val,
+                lazy,
+            }
+        }
+
+        pub fn get(&mut self, pos: usize) -> T {
+            let i = pos + self.n;
+            for d in (1..self.depth).rev() {
+                self.propagate(i >> d);
+            }
+            self.val[pos + self.n]
+        }
+
+        pub fn set(&mut self, pos: usize, x: T) {
+            let i = pos + self.n;
+            for d in (0..self.depth).rev() {
+                self.propagate(i >> d);
+            }
+            self.val[i] = x;
+            for d in 1..self.depth {
+                self.update(i >> d);
+            }
+        }
+
+        pub fn apply(&mut self, mut l: usize, mut r: usize, f: U) {
+            l += self.n;
+            r += self.n;
+
+            for d in (1..self.depth).rev() {
+                if ((l >> d) << d) != l {
+                    self.propagate(l >> d);
+                }
+                if ((r >> d) << d) != r {
+                    self.propagate((r - 1) >> d);
+                }
+            }
+
+            {
+                let (l2, r2) = (l, r);
+                while l < r {
+                    if (l & 1) == 1 {
+                        self.apply_to_node(l, f);
+                        l += 1;
+                    }
+                    if (r & 1) == 1 {
+                        r -= 1;
+                        self.apply_to_node(r, f);
+                    }
+                    l >>= 1;
+                    r >>= 1;
+                }
+                (l, r) = (l2, r2);
+            }
+
+            for d in 1..self.depth {
+                if ((l >> d) << d) != l {
+                    self.update(l >> d);
+                }
+                if ((r >> d) << d) != r {
+                    self.update((r - 1) >> d);
+                }
+            }
+        }
+
+        pub fn prod(&mut self, mut l: usize, mut r: usize) -> T {
+            l += self.n;
+            r += self.n;
+
+            for d in (1..self.depth).rev() {
+                if ((l >> d) << d) != l {
+                    self.propagate(l >> d);
+                }
+                if ((r >> d) << d) != r {
+                    self.propagate((r - 1) >> d);
+                }
+            }
+            let (mut vl, mut vr) = (T::e(), T::e());
+            while l < r {
+                if (l & 1) == 1 {
+                    vl = vl.op(self.val[l]);
+                    l += 1;
+                }
+                if (r & 1) == 1 {
+                    r -= 1;
+                    vr = self.val[r].op(vr);
+                }
+                l >>= 1;
+                r >>= 1;
+            }
+
+            vl.op(vr)
+        }
+
+        fn update(&mut self, k: usize) {
+            if k >= self.n {
+                return;
+            }
+            self.val[k] = self.val[k << 1].op(self.val[(k << 1) + 1]);
+        }
+
+        fn apply_to_node(&mut self, k: usize, f: U) {
+            self.val[k] = f.mapping(self.val[k]);
+            if k < self.n {
+                self.lazy[k] = if let Some(lz) = self.lazy[k] {
+                    Some(f.composition(lz))
+                } else {
+                    Some(f)
+                }
+            }
+        }
+
+        fn propagate(&mut self, k: usize) {
+            if let Some(lz) = self.lazy[k].take() {
+                for i in 0..2 {
+                    let j = (k << 1) + i;
+                    self.apply_to_node(j, lz);
+                }
+            }
+        }
+    }
+
+    fn bit_ceil(x: usize) -> usize {
+        if x.is_power_of_two() {
+            x
+        } else {
+            fill_one(x) + 1
+        }
+    }
+
+    fn bit_width(x: usize) -> usize {
+        x.ilog2() as usize + 1
+    }
+
+    fn fill_one(mut x: usize) -> usize {
+        for i in 0..=5 {
+            x |= x >> (1 << i);
+        }
+        x
+    }
+}
+```
+
+## Example
+- [029 - Long Bricks（★5） (Rust)](https://atcoder.jp/contests/typical90/submissions/55437201)

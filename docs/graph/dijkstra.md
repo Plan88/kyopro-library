@@ -55,3 +55,65 @@ struct Graph {
     std::vector<std::vector<Edge>> edges;
 };
 ```
+
+## Rust
+```rust
+mod graph {
+    use std::{cmp::Reverse, collections::BinaryHeap};
+
+    use num::{Bounded, Num};
+
+    #[derive(Clone, Copy)]
+    struct Edge<T: Ord + Copy + Num + Bounded> {
+        from: usize,
+        to: usize,
+        cost: T,
+    }
+
+    pub struct Graph<T: Ord + Copy + Num + Bounded> {
+        n: usize,
+        edges: Vec<Vec<Edge<T>>>,
+    }
+
+    impl<T: Ord + Copy + Num + Bounded> Graph<T> {
+        pub fn new(n: usize) -> Self {
+            let edges = vec![vec![]; n];
+            Self { n, edges }
+        }
+
+        pub fn add_directed_edge(&mut self, from: usize, to: usize, cost: T) {
+            let edge = Edge { from, to, cost };
+            self.edges[from].push(edge);
+        }
+
+        pub fn add_edge(&mut self, from: usize, to: usize, cost: T) {
+            self.add_directed_edge(from, to, cost);
+            self.add_directed_edge(to, from, cost);
+        }
+
+        /// 頂点 s から各頂点への最短距離を計算する
+        pub fn dijkstra(&self, s: usize) -> Vec<T> {
+            let mut dist = vec![T::max_value(); self.n];
+            let mut q = BinaryHeap::<Reverse<(T, usize)>>::new();
+
+            dist[s] = T::zero();
+            q.push(Reverse((T::zero(), s)));
+            while let Some(Reverse((cost, v))) = q.pop() {
+                if dist[v] < cost {
+                    continue;
+                }
+
+                for edge in self.edges[v].iter() {
+                    let new_cost = cost + edge.cost;
+                    if dist[edge.to] > new_cost {
+                        dist[edge.to] = new_cost;
+                        q.push(Reverse((new_cost, edge.to)));
+                    }
+                }
+            }
+
+            dist
+        }
+    }
+}
+```

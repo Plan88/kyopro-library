@@ -1,4 +1,4 @@
-## c++
+## C++
 ```c++
 struct UnionFind{
     vector<int> par; // par[i]:iの親の番号
@@ -34,4 +34,41 @@ struct UnionFind{
         return s[root(x)];
     }
 };
+```
+
+## Rust
+```rust
+pub struct UnionFind {
+    par: Vec<usize>,
+}
+
+impl UnionFind {
+    pub fn new(n: usize) -> Self {
+        let par = (0..n).collect::<Vec<usize>>();
+        Self { par }
+    }
+
+    pub fn unite(&mut self, x: usize, y: usize) {
+        let rx = self.root(x);
+        let ry = self.root(y);
+
+        self.par[rx] = ry;
+    }
+
+    pub fn root(&mut self, x: usize) -> usize {
+        let r = self.par[x];
+
+        if r == x {
+            return r;
+        }
+
+        self.par[x] = self.root(r);
+
+        return self.par[x];
+    }
+
+    pub fn is_same(&mut self, x: usize, y: usize) -> bool {
+        self.root(x) == self.root(y)
+    }
+}
 ```
