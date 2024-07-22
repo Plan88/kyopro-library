@@ -100,6 +100,62 @@ struct RollingHash {
 };
 ```
 
+## Rust
+```rust
+#[allow(dead_code)]
+mod string {
+    use num::PrimInt;
+    use rand::Rng;
+
+    pub struct RollingHash {
+        n: usize,
+        hash: Vec<u128>,
+        b: Vec<u128>,
+        base: u128,
+    }
+
+    impl RollingHash {
+        const MOD: u128 = (1 << 61) - 1;
+
+        pub fn from_string(s: String, base: Option<u128>) -> Self {
+            Self::build(s.into_bytes(), base)
+        }
+
+        pub fn from_vec<T: PrimInt>(v: Vec<T>, base: Option<u128>) -> Self {
+            Self::build(v, base)
+        }
+
+        pub fn get(&self, l: usize, r: usize) -> u64 {
+            let mut hash = self.hash[r] + Self::MOD - self.hash[l] * self.b[r - l] % Self::MOD;
+            if hash >= Self::MOD {
+                hash -= Self::MOD;
+            }
+            hash as u64
+        }
+
+        fn build<T: PrimInt>(v: Vec<T>, base: Option<u128>) -> Self {
+            let base = if let Some(b) = base { b } else { get_base() };
+            let n = v.len();
+            let mut hash = vec![0; n + 1];
+            let mut b = vec![0; n + 1];
+            b[0] = 1;
+            for i in 0..n {
+                b[i + 1] = b[i] * base % Self::MOD;
+                hash[i + 1] = (hash[i] * base + v[i].to_u128().unwrap()) % Self::MOD;
+            }
+
+            Self { n, hash, b, base }
+        }
+    }
+
+    pub fn get_base() -> u128 {
+        let mut rng = rand::thread_rng();
+        rng.gen::<u64>() as u128
+    }
+}
+```
+
 ## Example
 
 - [Codeforces Round 934 (Div. 1) B. Non-Palindromic Substring (C++)](https://codeforces.com/contest/1943/submission/254546503)
+- [047 - Monochromatic Diagonal（★7） (Rust)](https://atcoder.jp/contests/typical90/submissions/55837310)
