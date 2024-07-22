@@ -38,37 +38,59 @@ struct UnionFind{
 
 ## Rust
 ```rust
-pub struct UnionFind {
-    par: Vec<usize>,
-}
-
-impl UnionFind {
-    pub fn new(n: usize) -> Self {
-        let par = (0..n).collect::<Vec<usize>>();
-        Self { par }
+mod data_structure {
+    pub struct UnionFind {
+        par: Vec<usize>,
+        size: Vec<usize>,
+        num_group: usize,
     }
 
-    pub fn unite(&mut self, x: usize, y: usize) {
-        let rx = self.root(x);
-        let ry = self.root(y);
-
-        self.par[rx] = ry;
-    }
-
-    pub fn root(&mut self, x: usize) -> usize {
-        let r = self.par[x];
-
-        if r == x {
-            return r;
+    impl UnionFind {
+        pub fn new(n: usize) -> Self {
+            let par = (0..n).collect::<Vec<usize>>();
+            let size = vec![1; n];
+            let num_group = n;
+            Self {
+                par,
+                size,
+                num_group,
+            }
         }
 
-        self.par[x] = self.root(r);
+        /// merge x to y
+        pub fn unite(&mut self, x: usize, y: usize) {
+            let rx = self.root(x);
+            let ry = self.root(y);
 
-        return self.par[x];
-    }
+            self.par[rx] = ry;
 
-    pub fn is_same(&mut self, x: usize, y: usize) -> bool {
-        self.root(x) == self.root(y)
+            if rx != ry {
+                self.size[ry] += self.size[rx];
+                self.size[rx] = 0;
+                self.num_group -= 1;
+            }
+        }
+
+        pub fn root(&mut self, x: usize) -> usize {
+            let r = self.par[x];
+
+            if r == x {
+                return r;
+            }
+
+            self.par[x] = self.root(r);
+
+            return self.par[x];
+        }
+
+        pub fn is_same(&mut self, x: usize, y: usize) -> bool {
+            self.root(x) == self.root(y)
+        }
+
+        /// 連結成分数
+        pub fn get_num_tree(&self) -> usize {
+            self.num_group
+        }
     }
 }
 ```
