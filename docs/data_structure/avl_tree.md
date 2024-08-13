@@ -35,7 +35,7 @@ mod data_structure {
             self.root.erase(value, usize::MAX)
         }
 
-        pub fn lower_bond(&mut self, value: T) -> Option<&T> {
+        pub fn lower_bound(&mut self, value: T) -> Option<&T> {
             self.root.lower_bound(value)
         }
     }
