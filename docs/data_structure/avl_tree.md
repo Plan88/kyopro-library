@@ -27,8 +27,16 @@ mod data_structure {
             self.root.get_at_k(k)
         }
 
-        pub fn erase(&mut self, value: T) -> bool {
-            self.root.erase(value)
+        pub fn erase_one(&mut self, value: T) -> bool {
+            self.root.erase(value, 1)
+        }
+
+        pub fn erase_all(&mut self, value: T) -> bool {
+            self.root.erase(value, usize::MAX)
+        }
+
+        pub fn lower_bond(&mut self, value: T) -> Option<&T> {
+            self.root.lower_bound(value)
         }
     }
 
@@ -75,11 +83,14 @@ mod data_structure {
             self.rebalance();
         }
 
-        fn rebalance(&mut self) {
-            match self.get_height_diff() {
-                x if x < -1 => self.rotate_left(),
-                x if x > 1 => self.rotate_right(),
-                _ => (),
+        fn contains(&self, value: T) -> bool {
+            match *self {
+                Self::Empty => false,
+                Self::Node(ref node) => match node.value.cmp(&value) {
+                    Ordering::Less => node.right.contains(value),
+                    Ordering::Equal => true,
+                    Ordering::Greater => node.left.contains(value),
+                },
             }
         }
 
@@ -98,38 +109,52 @@ mod data_structure {
             }
         }
 
-        fn contains(&self, value: T) -> bool {
-            match *self {
-                Self::Empty => false,
-                Self::Node(ref node) => match node.value.cmp(&value) {
-                    Ordering::Less => node.right.contains(value),
-                    Ordering::Equal => true,
-                    Ordering::Greater => node.left.contains(value),
-                },
-            }
-        }
-
-        fn erase(&mut self, value: T) -> bool {
+        fn erase(&mut self, value: T, count: usize) -> bool {
             let flag = match *self {
                 Self::Empty => false,
                 Self::Node(ref mut node) => match node.value.cmp(&value) {
-                    Ordering::Less => node.right.erase(value),
+                    Ordering::Less => node.right.erase(value, count),
                     Ordering::Equal => {
-                        if let Self::Node(max) = node.left.take_max() {
-                            node.value = max.value;
-                        } else if let Self::Node(min) = node.right.take_min() {
-                            node.value = min.value;
-                        } else {
-                            self.take();
+                        node.count = node.count.saturating_sub(count);
+                        if node.count == 0 {
+                            if let Self::Node(max) = node.left.take_max() {
+                                node.value = max.value;
+                                node.count = max.count;
+                            } else if let Self::Node(min) = node.right.take_min() {
+                                node.value = min.value;
+                                node.count = min.count;
+                            } else {
+                                self.take();
+                            }
                         }
                         true
                     }
-                    Ordering::Greater => node.left.erase(value),
+                    Ordering::Greater => node.left.erase(value, count),
                 },
             };
             self.update_node_attributes();
             self.rebalance();
             flag
+        }
+
+        fn lower_bound(&self, value: T) -> Option<&T> {
+            match *self {
+                Self::Empty => None,
+                Self::Node(ref node) => {
+                    let lower = match node.value.cmp(&value) {
+                        Ordering::Less => node.right.lower_bound(value),
+                        Ordering::Equal => Some(&node.value),
+                        Ordering::Greater => {
+                            let mut lower = Some(&node.value);
+                            if let Some(value) = node.left.lower_bound(value) {
+                                lower = Some(value);
+                            }
+                            lower
+                        }
+                    };
+                    lower
+                }
+            }
         }
 
         fn take_max(&mut self) -> Self {
@@ -173,6 +198,18 @@ mod data_structure {
             min
         }
 
+        fn take(&mut self) -> Self {
+            std::mem::take(self)
+        }
+
+        fn rebalance(&mut self) {
+            match self.get_height_diff() {
+                x if x < -1 => self.rotate_left(),
+                x if x > 1 => self.rotate_right(),
+                _ => (),
+            }
+        }
+
         fn rotate_right(&mut self) {
             match *self {
                 Self::Empty => (),
@@ -207,10 +244,6 @@ mod data_structure {
                     self.update_node_attributes();
                 }
             }
-        }
-
-        fn take(&mut self) -> Self {
-            std::mem::take(self)
         }
 
         fn update_node_attributes(&mut self) {
@@ -282,4 +315,4 @@ mod data_structure {
 ```
 
 ## Examples
-- [ARC033 C - データ構造 (Rust)](https://atcoder.jp/contests/arc033/submissions/56652449)
+- [ARC033 C - データ構造 (Rust)](https://atcoder.jp/contests/arc033/submissions/56654802)
