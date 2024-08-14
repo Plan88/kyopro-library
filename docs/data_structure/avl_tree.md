@@ -19,8 +19,12 @@ mod data_structure {
             self.root.insert(value);
         }
 
+        pub fn get_count(&self, value: T) -> usize {
+            self.root.get_count(value)
+        }
+
         pub fn contains(&self, value: T) -> bool {
-            self.root.contains(value)
+            self.get_count(value) > 0
         }
 
         pub fn get_at_k(&self, k: usize) -> &T {
@@ -38,6 +42,14 @@ mod data_structure {
         pub fn lower_bound(&mut self, value: T) -> Option<&T> {
             self.root.lower_bound(value)
         }
+
+        pub fn len(&self) -> usize {
+            self.root.get_tree_info().count_all
+        }
+
+        pub fn count_unique(&self) -> usize {
+            self.root.get_tree_info().count_unique
+        }
     }
 
     #[derive(Debug, Clone)]
@@ -47,6 +59,7 @@ mod data_structure {
         right: Box<AVLTreeInner<T>>,
         count: usize,
         height: usize,
+        count_unique: usize,
         count_all: usize,
     }
 
@@ -58,6 +71,7 @@ mod data_structure {
                 right: Box::new(AVLTreeInner::Empty),
                 count: 1,
                 height: 1,
+                count_unique: 1,
                 count_all: 1,
             }
         }
@@ -90,6 +104,17 @@ mod data_structure {
                     Ordering::Less => node.right.contains(value),
                     Ordering::Equal => true,
                     Ordering::Greater => node.left.contains(value),
+                },
+            }
+        }
+
+        fn get_count(&self, value: T) -> usize {
+            match *self {
+                Self::Empty => 0,
+                Self::Node(ref node) => match node.value.cmp(&value) {
+                    Ordering::Less => node.right.get_count(value),
+                    Ordering::Equal => node.count,
+                    Ordering::Greater => node.left.get_count(value),
                 },
             }
         }
@@ -253,6 +278,8 @@ mod data_structure {
                     let left_tree_info = node.left.get_tree_info();
                     let right_tree_info = node.right.get_tree_info();
                     node.height = 1 + left_tree_info.height.max(right_tree_info.height);
+                    node.count_unique =
+                        1 + left_tree_info.count_unique + right_tree_info.count_unique;
                     node.count_all =
                         node.count + left_tree_info.count_all + right_tree_info.count_all;
                 }
@@ -264,11 +291,13 @@ mod data_structure {
                 Self::Empty => TreeInfo {
                     count: 0,
                     height: 0,
+                    count_unique: 0,
                     count_all: 0,
                 },
                 Self::Node(ref node) => TreeInfo {
                     count: node.count,
                     height: node.height,
+                    count_unique: node.count_unique,
                     count_all: node.count_all,
                 },
             }
@@ -309,6 +338,7 @@ mod data_structure {
     struct TreeInfo {
         count: usize,
         height: usize,
+        count_unique: usize,
         count_all: usize,
     }
 }
