@@ -8,7 +8,7 @@ struct Compressor1D {
 
         int N = v.size();
         restorator.resize(N);
-        for(int i=0; i<N; ++i) {
+        for(int i = 0; i < N; ++i) {
             compressor[v[i]] = i;
             restorator[i] = v[i];
         }
