@@ -18,8 +18,10 @@ std::vector<int> longest_increasing_subsequence(std::vector<T> &v, T inf) {
 
     for(int i = 0; i < N; i++) {
         int t = lb(v[i]);
-        dp[t] = v[i];
-        index[t] = i;
+        if(v[i] < dp[t]) {
+            dp[t] = v[i];
+            index[t] = i;
+        }
         if(t > 0) {
             prev[i] = index[t-1];
         }
@@ -54,8 +56,10 @@ std::vector<int> longest_increasing_subsequence(std::vector<T> &v, T inf) {
 
     for(int i = 0; i < N; i++) {
         int t = ub(v[i]);
-        dp[t] = v[i];
-        index[t] = i;
+        if(v[i] < dp[t]) {
+            dp[t] = v[i];
+            index[t] = i;
+        }
         if(t > 0) {
             prev[i] = index[t-1];
         }
