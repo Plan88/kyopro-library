@@ -9,6 +9,7 @@ std::vector<std::pair<T, int>> run_length_encode(std::vector<T> v) {
         int right = left + 1;
         while (right < n and v[left] == v[right]) right++;
         encoded.emplace_back(v[left], right - left);
+        left = right;
     }
 
     return encoded;
