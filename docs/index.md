@@ -103,54 +103,54 @@
 
 ## Math
 
-| Title                                                 | Status | Submission |
-|-------------------------------------------------------|:------:|:----------:|
-| Enumerate Quotients                                   |        |            |
-| Primality Test                                        |        |            |
-| Counting Primes                                       |        |            |
-| Enumerate Primes                                      |        |            |
-| Factorize                                             |        |            |
-| Primitive Root                                        |        |            |
-| Factorial                                             |        |            |
-| Many Factorials                                       |        |            |
-| Binomial Coefficient                                  |        |            |
-| Binomial Coefficient (Prime Mod)                      |        |            |
-| Stirling Number of the First Kind                     |        |            |
-| Stirling Number of the First Kind (Fixed K)           |        |            |
-| Stirling Number of the Second Kind                    |        |            |
-| Stirling Number of the Second Kind (Fixed K)          |        |            |
-| Stirling Number of the First Kind (Small p, Large n)  |        |            |
-| Stirling Number of the Second Kind (Small p, Large n) |        |            |
-| Bernoulli Number                                      |        |            |
-| Partition Function                                    |        |            |
-| Montmort Number                                       |        |            |
-| Counting Square-free Integers                         |        |            |
-| Sum of Totient Function                               |        |            |
-| $\sum_{i=0}^{n-1} r^ii^d$                             |        |            |
-| $\sum_{i=0}^{\infty} r^ii^d$                          |        |            |
-| Find Linear Recurrence                                |        |            |
-| Kth term of Linearly Recurrent Sequence               |        |            |
-| Consecutive Terms of Linear Recurrent Sequence        |        |            |
-| Sum of Floor of Linear                                |        |            |
-| Min of Mod of Linear                                  |        |            |
-| Sqrt Mod                                              |        |            |
-| Kth Root (Mod)                                        |        |            |
-| Kth Root (Integer)                                    |        |            |
-| Discrete Logarithm                                    |        |            |
-| Tetration Mod                                         |        |            |
-| Nim Product ($\mathbb{F}_{2^{64}}$)                   |        |            |
-| $\#_p$ Subset Sum                                     |        |            |
-| 2 Sat                                                 |        |            |
-| Longest Increasing Subsequence                        |        |            |
-| Number of Subsequences                                |        |            |
-| Addition of Big Integers                              |        |            |
-| Multiplication of Big Integers                        |        |            |
-| Division of Big Integers                              |        |            |
-| Stern-Brocot Tree                                     |        |            |
-| Polynomial Composite Set Power Series                 |        |            |
-| Exp of Set Power Series                               |        |            |
-| Gcd of Gaussian Integers                              |        |            |
-|                                                       |        |            |
+| Title                                                 | Status             | Submission                                                   |
+|-------------------------------------------------------|:------------------:|:------------------------------------------------------------:|
+| Enumerate Quotients                                   | :white_check_mark: | <a href="https://judge.yosupo.jp/submission/207067">link</a> |
+| Primality Test                                        |                    |                                                              |
+| Counting Primes                                       |                    |                                                              |
+| Enumerate Primes                                      |                    |                                                              |
+| Factorize                                             |                    |                                                              |
+| Primitive Root                                        |                    |                                                              |
+| Factorial                                             |                    |                                                              |
+| Many Factorials                                       |                    |                                                              |
+| Binomial Coefficient                                  |                    |                                                              |
+| Binomial Coefficient (Prime Mod)                      |                    |                                                              |
+| Stirling Number of the First Kind                     |                    |                                                              |
+| Stirling Number of the First Kind (Fixed K)           |                    |                                                              |
+| Stirling Number of the Second Kind                    |                    |                                                              |
+| Stirling Number of the Second Kind (Fixed K)          |                    |                                                              |
+| Stirling Number of the First Kind (Small p, Large n)  |                    |                                                              |
+| Stirling Number of the Second Kind (Small p, Large n) |                    |                                                              |
+| Bernoulli Number                                      |                    |                                                              |
+| Partition Function                                    |                    |                                                              |
+| Montmort Number                                       |                    |                                                              |
+| Counting Square-free Integers                         |                    |                                                              |
+| Sum of Totient Function                               |                    |                                                              |
+| $\sum_{i=0}^{n-1} r^ii^d$                             |                    |                                                              |
+| $\sum_{i=0}^{\infty} r^ii^d$                          |                    |                                                              |
+| Find Linear Recurrence                                |                    |                                                              |
+| Kth term of Linearly Recurrent Sequence               |                    |                                                              |
+| Consecutive Terms of Linear Recurrent Sequence        |                    |                                                              |
+| Sum of Floor of Linear                                |                    |                                                              |
+| Min of Mod of Linear                                  |                    |                                                              |
+| Sqrt Mod                                              |                    |                                                              |
+| Kth Root (Mod)                                        |                    |                                                              |
+| Kth Root (Integer)                                    |                    |                                                              |
+| Discrete Logarithm                                    |                    |                                                              |
+| Tetration Mod                                         |                    |                                                              |
+| Nim Product ($\mathbb{F}_{2^{64}}$)                   |                    |                                                              |
+| $\#_p$ Subset Sum                                     |                    |                                                              |
+| 2 Sat                                                 |                    |                                                              |
+| Longest Increasing Subsequence                        |                    |                                                              |
+| Number of Subsequences                                |                    |                                                              |
+| Addition of Big Integers                              |                    |                                                              |
+| Multiplication of Big Integers                        |                    |                                                              |
+| Division of Big Integers                              |                    |                                                              |
+| Stern-Brocot Tree                                     |                    |                                                              |
+| Polynomial Composite Set Power Series                 |                    |                                                              |
+| Exp of Set Power Series                               |                    |                                                              |
+| Gcd of Gaussian Integers                              |                    |                                                              |
+|                                                       |                    |                                                              |
 
 ## Convolution
 
