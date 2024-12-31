@@ -1,3 +1,70 @@
+## C++
+```c++
+template<class T>
+struct Set {
+    Set(ll none): none(none) {}
+
+    void insert(T v) {
+        st.insert(v);
+    }
+
+    void erase(T v) {
+        st.erase(v);
+    }
+
+    bool contains(T v) {
+        return st.contains(v);
+    }
+
+    bool is_none(T v) {
+        return v == none;
+    }
+
+    // minimum x such that v <= x
+    T ge(T v) {
+        auto itr = st.lower_bound(v);
+        if(itr == st.end()) return none;
+        return *itr;
+    }
+
+    // minimum x such that v < x
+    T gt(T v) {
+        auto itr = st.upper_bound(v);
+        if(itr == st.end()) return none;
+        return *itr;
+    }
+
+    // maximum x such that v >= x
+    T le(T v) {
+        if(st.empty()) return none;
+        auto itr = st.lower_bound(v);
+        if(itr == st.begin()) {
+            if(*itr <= v) return *itr;
+            else return none;
+        }
+
+        if(itr == st.end()) itr--;
+        else if(*itr > v) itr--;
+        return *itr;
+    }
+
+    // minimum x such that v >= x
+    T lt(T v) {
+        if(st.empty()) return none;
+        auto itr = st.lower_bound(v);
+        if(itr == st.begin()) {
+            return none;
+        }
+
+        itr--;
+        return *itr;
+    }
+  private:
+    T none;
+    std::set<T> st;
+};
+```
+
 ## Rust
 ```rust
 use std::collections::BTreeSet;
