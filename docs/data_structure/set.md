@@ -48,7 +48,7 @@ struct Set {
         return *itr;
     }
 
-    // minimum x such that v >= x
+    // minimum x such that v > x
     T lt(T v) {
         if(st.empty()) return none;
         auto itr = st.lower_bound(v);
