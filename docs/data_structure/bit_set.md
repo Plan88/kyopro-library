@@ -35,13 +35,19 @@ mod data_structure {
             Self { internal }
         }
 
+        /// bytes から生成
+        /// bytes の i 番目の要素は下から i ビット目になる
         pub fn from_bytes(bytes: Vec<u8>) -> Self {
             assert!(is_01bytes(&bytes));
             let n = bytes.len();
             let mut internal = vec![];
             for i in (0..n).step_by(128) {
-                let si = &bytes[i..i + 128].iter().join("");
-                internal.push(u128::from_str_radix(si, 2).unwrap());
+                let string = bytes[i..(i + 128).min(n)]
+                    .iter()
+                    .rev()
+                    .map(|&byte| byte - b'0')
+                    .join("");
+                internal.push(u128::from_str_radix(&string, 2).unwrap());
             }
             Self { internal }
         }
@@ -57,6 +63,14 @@ mod data_structure {
             }
         }
 
+        pub fn count(&self) -> usize {
+            let mut count = 0;
+            for &integer in self.internal.iter() {
+                count += integer.count_ones();
+            }
+            count as usize
+        }
+
         pub fn is_one_bit(&self, i: usize) -> bool {
             assert!(!self.is_out_of_range(i));
             let (i, j) = get_pos_and_bit(i);
@@ -67,6 +81,40 @@ mod data_structure {
         }
         pub fn is_zero(&self) -> bool {
             self.internal.iter().all(|x| x == &0)
+        }
+
+        pub fn and_inplace(&mut self, other: &Self) {
+            let n = self.internal.len().min(other.internal.len());
+            for i in 0..n {
+                self.internal[i] &= other.internal[i];
+            }
+            while self.internal.len() > n {
+                self.internal.pop();
+            }
+        }
+        pub fn and(&self, other: &Self) -> Self {
+            let mut and = Self {
+                internal: self.internal.clone(),
+            };
+            and.and_inplace(other);
+            and
+        }
+
+        pub fn or_inplace(&mut self, other: &Self) {
+            let n = self.internal.len().min(other.internal.len());
+            for i in 0..n {
+                self.internal[i] |= other.internal[i];
+            }
+            for i in n..other.internal.len() {
+                self.internal.push(other.internal[i]);
+            }
+        }
+        pub fn or(&self, other: &Self) -> Self {
+            let mut or = Self {
+                internal: self.internal.clone(),
+            };
+            or.or_inplace(other);
+            or
         }
 
         pub fn xor_inplace(&mut self, other: &Self) {
@@ -132,14 +180,14 @@ mod data_structure {
         is_01bytes(s.as_bytes())
     }
     fn is_01bytes(bytes: &[u8]) -> bool {
-        bytes
-            .iter()
-            .filter(|bi| bi != &&b'0' || bi != &&b'1')
-            .collect::<Vec<_>>()
-            .is_empty()
+        bytes.iter().all(|bi| bi == &b'0' || bi == &b'1')
     }
     fn get_pos_and_bit(i: usize) -> (usize, usize) {
         (i / 128, i % 128)
     }
 }
 ```
+
+## Examples
+
+- [ABC258 G - Triangle](https://atcoder.jp/contests/abc258/submissions/61501928)
