@@ -240,7 +240,7 @@ pub mod data_structure {
 
         pub fn set(&mut self, pos: usize, x: T) {
             let i = pos + self.n;
-            for d in (0..self.depth).rev() {
+            for d in (1..self.depth).rev() {
                 self.propagate(i >> d);
             }
             self.val[i] = x;
