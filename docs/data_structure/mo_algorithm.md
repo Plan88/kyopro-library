@@ -170,7 +170,7 @@ pub mod mo {
             segments
         }
 
-        pub fn solve<T: Copy>(&mut self, p: &mut impl Problem<T>) -> Vec<T> {
+        pub fn solve<T: Copy, P: Problem<T>>(&mut self, p: &mut P) -> Vec<T> {
             let (mut l, mut r) = (0, 0);
             let segments = self.get_sorted_segment();
             let mut answers = vec![None; self.q];
