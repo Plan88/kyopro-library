@@ -113,7 +113,7 @@ struct Mo {
 
 ## Rust
 ```rust
-pub mod mo {
+pub mod data_structure {
     use itertools::Itertools;
     use num_integer::Roots;
 
@@ -136,13 +136,13 @@ pub mod mo {
         q: usize,
         l: Vec<usize>,
         r: Vec<usize>,
-        sqrt_q: usize,
+        sqrt: usize,
     }
 
     impl Mo {
         pub fn new(n: usize, q: usize, l: Vec<usize>, r: Vec<usize>) -> Self {
-            let sqrt_q = q.sqrt();
-            Self { n, q, l, r, sqrt_q }
+            let sqrt = n.max(q).sqrt();
+            Self { n, q, l, r, sqrt }
         }
 
         fn get_sorted_segment(&self) -> Vec<Segment> {
@@ -155,7 +155,7 @@ pub mod mo {
                     l,
                     r,
                     query_id: i,
-                    block_id: l / self.sqrt_q,
+                    block_id: l / self.sqrt,
                 })
                 .collect_vec();
 
