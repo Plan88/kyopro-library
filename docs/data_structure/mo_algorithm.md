@@ -226,3 +226,4 @@ pub mod data_structure {
 - [ABC238 G - Cubic? (C++)](https://atcoder.jp/contests/abc238/submissions/51889578)
 - [ABC242 G - Range Pairing Query (Rust)](https://atcoder.jp/contests/abc242/submissions/49753477?lang=ja)
 - [ABC293 G - Triple Index (Rust)](https://atcoder.jp/contests/abc293/submissions/49753756)
+- [ABC384 G - Abs Sum (Rust)](https://atcoder.jp/contests/abc384/submissions/61924950)
