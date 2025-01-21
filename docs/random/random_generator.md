@@ -1,10 +1,12 @@
 ## Rust
 ```rust
 pub mod rand_generator {
-    use num_traits::PrimInt;
     use rand::{seq::SliceRandom, Rng};
     use rand_chacha::{rand_core::SeedableRng, ChaCha20Rng};
-    use rand_distr::{Distribution, Normal};
+    use rand_distr::{
+        uniform::{SampleRange, SampleUniform},
+        Distribution, Normal,
+    };
 
     pub struct RandomGenerator {
         rng: ChaCha20Rng,
@@ -20,12 +22,8 @@ pub mod rand_generator {
             normal_dist.sample(&mut self.rng)
         }
 
-        pub fn gen_range<T: PrimInt>(&mut self, low: i64, high: i64, equal: bool) -> T {
-            if equal {
-                T::from(self.rng.gen_range(low..=high)).unwrap()
-            } else {
-                T::from(self.rng.gen_range(low..high)).unwrap()
-            }
+        pub fn gen_range<T: SampleUniform, U: SampleRange<T>>(&mut self, range: U) -> T {
+            self.rng.gen_range(range)
         }
 
         pub fn gen_bool(&mut self, prob: f64) -> bool {
@@ -33,12 +31,12 @@ pub mod rand_generator {
         }
 
         pub fn gen_permutation(&mut self, n: usize) -> Vec<usize> {
-            let mut permutation: Vec<usize> = (1..=n).collect();
+            let mut permutation: Vec<usize> = (0..n).collect();
             permutation.shuffle(&mut self.rng);
             permutation
         }
 
-        pub fn shuffle<T>(&mut self, v: &mut Vec<T>) {
+        pub fn shuffle<T: SliceRandom>(&mut self, v: &mut T) {
             v.shuffle(&mut self.rng);
         }
     }
