@@ -43,17 +43,18 @@ mod compression {
     }
 
     impl<T: Copy + Ord> Compressor1D<T> {
-        pub fn new(v: Vec<T>) -> Self {
+        pub fn new<I: IntoIterator<Item = T>>(v: I) -> Self {
             Self::build(v)
         }
 
-        fn build(mut v: Vec<T>) -> Self {
+        fn build<I: IntoIterator<Item = T>>(v: I) -> Self {
             let mut compressor = BTreeMap::new();
+            let mut v = v.into_iter().collect::<Vec<T>>();
             v.sort();
             let mut counter = 0;
             let mut restorator = vec![];
 
-            for vi in v.into_iter() {
+            for vi in v {
                 if compressor.contains_key(&vi) {
                     continue;
                 }
@@ -82,6 +83,10 @@ mod compression {
             } else {
                 None
             }
+        }
+
+        pub fn len(&self) -> usize {
+            self.compressor.len()
         }
     }
 }
