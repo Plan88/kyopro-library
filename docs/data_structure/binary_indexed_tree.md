@@ -1,4 +1,4 @@
-## c++
+## C++
 ```c++
 template<typename T>
 struct BIT{
@@ -51,4 +51,73 @@ struct BIT{
             return sum(r-1) - sum(l-1);
         }
 };
+```
+
+## Rust
+```rust
+pub mod data_structure {
+    use std::ops::{Add, Sub};
+
+    use num::Zero;
+
+    pub trait FenwickTreeTrait: Add<Output = Self> + Copy {
+        fn add_fenwick(&self, rhs: Self) -> Self {
+            *self + rhs
+        }
+    }
+    impl FenwickTreeTrait for i64 {}
+
+    pub struct FenwickTree<T: FenwickTreeTrait> {
+        n: usize,
+        data: Vec<T>,
+    }
+
+    impl<T: FenwickTreeTrait> FenwickTree<T> {
+        pub fn from_iterable<I: IntoIterator<Item = T>>(iter: I) -> Self {
+            let data: Vec<T> = iter.into_iter().collect();
+            let n = data.len();
+            Self { n, data }
+        }
+
+        /// add x at pos (0-indexed)
+        pub fn add(&mut self, mut pos: usize, x: T) {
+            pos += 1;
+            while pos <= self.n {
+                self.data[pos] = self.data[pos].add_fenwick(x);
+                pos += lsb(pos);
+            }
+        }
+    }
+
+    impl<T: FenwickTreeTrait + Zero> FenwickTree<T> {
+        pub fn new(n: usize) -> Self {
+            Self {
+                n,
+                data: vec![T::zero(); n + 1],
+            }
+        }
+
+        /// return sum of [0, pos) (0-indexed)
+        pub fn cumsum(&self, mut pos: usize) -> T {
+            let mut sum = T::zero();
+            while pos > 0 {
+                sum = sum.add_fenwick(self.data[pos]);
+                pos -= lsb(pos);
+            }
+            sum
+        }
+    }
+
+    impl<T: FenwickTreeTrait + Zero + Sub<Output = T>> FenwickTree<T> {
+        /// return sum of [left, right) (0-indexed)
+        pub fn sum(&self, left: usize, right: usize) -> T {
+            self.cumsum(right) - self.cumsum(left)
+        }
+    }
+
+    fn lsb(x: usize) -> usize {
+        let x_i32 = x as i32;
+        (x_i32 & -x_i32) as usize
+    }
+}
 ```
