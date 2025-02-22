@@ -184,7 +184,7 @@ pub mod beam_search {
                             (*score1, *p1)
                                 .partial_cmp(&(*score2, *p2))
                                 .unwrap()
-                                .reverse()
+                                .reverse()  // 最小化の場合は .reverse() を消す
                         },
                     );
                     next_states.truncate(beam_width);
@@ -224,7 +224,7 @@ pub mod beam_search {
             ..
         } = next_states
             .into_iter()
-            .max_by(
+            .max_by(  // 最小化の場合は min_by にする
                 |Candidate { score: score1, .. }, Candidate { score: score2, .. }| {
                     (*score1).partial_cmp(score2).unwrap()
                 },
