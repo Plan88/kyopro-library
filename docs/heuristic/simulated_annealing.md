@@ -203,7 +203,7 @@ pub mod rand_generator {
             permutation
         }
 
-        pub fn shuffle<T: SliceRandom>(&mut self, v: &mut T) {
+        pub fn shuffle<T>(&mut self, v: &mut [T]) {
             v.shuffle(&mut self.rng);
         }
     }

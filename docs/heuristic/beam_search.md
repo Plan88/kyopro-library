@@ -283,7 +283,7 @@ pub mod rand_generator {
             permutation
         }
 
-        pub fn shuffle<T>(&mut self, v: &mut Vec<T>) {
+        pub fn shuffle<T>(&mut self, v: &mut [T]) {
             v.shuffle(&mut self.rng);
         }
     }
