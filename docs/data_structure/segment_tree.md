@@ -1,4 +1,4 @@
-## c++
+## C++
 ```c++
 template <class S, S (*op)(S, S), S (*e)()> struct SegmentTree {
   public:
@@ -106,15 +106,18 @@ template <class S, S (*op)(S, S), S (*e)()> struct SegmentTree {
 ```
 
 ## Rust
-```Rust
-pub mod segtree {
+```rust
+pub mod data_structure {
+    use num::Integer;
+
     pub trait Monoid {
         fn e() -> Self;
         fn op(&self, rhs: Self) -> Self;
     }
 
     pub struct SegmentTree<T> {
-        n: usize,
+        n: usize, // m <= n となる最大の 2 の冪乗
+        m: usize, // 元の配列の長さ
         val: Vec<T>,
     }
 
@@ -146,7 +149,7 @@ pub mod segtree {
                 val[i] = val[l].op(val[r]);
             }
 
-            Self { n, val }
+            Self { n, m, val }
         }
 
         pub fn get(&self, pos: usize) -> T {
@@ -182,6 +185,76 @@ pub mod segtree {
             }
 
             v
+        }
+
+        /// find max r such that f(prod(l, r)) is true
+        pub fn max_right<F>(&self, l: usize, f: F) -> usize
+        where
+            F: Fn(T) -> bool,
+        {
+            let mut l = l + self.n;
+            let mut current_prod = T::e();
+
+            loop {
+                while l.is_even() {
+                    l >>= 1;
+                }
+                let next = current_prod.op(self.val[l]);
+                if !f(next) {
+                    break;
+                }
+                current_prod = next;
+                l += 1;
+                if l.is_power_of_two() {
+                    return self.m;
+                }
+            }
+
+            while l < self.n {
+                l <<= 1;
+                let next = current_prod.op(self.val[l]);
+                if f(next) {
+                    current_prod = next;
+                    l += 1;
+                }
+            }
+
+            l - self.n
+        }
+
+        /// find min l such that f(prod(l, r)) is true
+        pub fn min_left<F>(&self, r: usize, f: F) -> usize
+        where
+            F: Fn(T) -> bool,
+        {
+            let mut r = r + self.n;
+            let mut current_prod = T::e();
+
+            loop {
+                r -= 1;
+                while r > 1 && r.is_odd() {
+                    r >>= 1;
+                }
+                let next = self.val[r].op(current_prod);
+                if !f(next) {
+                    break;
+                }
+                current_prod = next;
+                if r.is_power_of_two() {
+                    return 0;
+                }
+            }
+
+            while r < self.n {
+                r = (r << 1) | 1;
+                let next = self.val[r].op(current_prod);
+                if f(next) {
+                    current_prod = next;
+                    r -= 1;
+                }
+            }
+
+            r + 1 - self.n
         }
     }
 }

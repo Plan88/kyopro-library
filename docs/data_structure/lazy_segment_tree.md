@@ -177,6 +177,8 @@ struct LazySegmentTree {
 ## Rust
 ```rust
 pub mod data_structure {
+    use num::Integer;
+
     pub trait Monoid {
         fn e() -> Self;
         fn op(&self, rhs: Self) -> Self;
@@ -189,6 +191,7 @@ pub mod data_structure {
 
     pub struct LazySegmentTree<T, U> {
         n: usize,     // length of leaf node
+        m: usize,     // length of original array
         depth: usize, // depth of tree, root's depth is 1
         val: Vec<T>,
         lazy: Vec<Option<U>>,
@@ -224,6 +227,7 @@ pub mod data_structure {
 
             Self {
                 n,
+                m,
                 depth,
                 val,
                 lazy,
@@ -316,6 +320,86 @@ pub mod data_structure {
             }
 
             vl.op(vr)
+        }
+
+        /// find max r such that f(prod(l, r)) is true
+        pub fn max_right<F>(&mut self, l: usize, f: F) -> usize
+        where
+            F: Fn(T) -> bool,
+        {
+            let mut l = l + self.n;
+            let mut current_prod = T::e();
+
+            for d in (1..self.depth).rev() {
+                self.propagate(l >> d);
+            }
+
+            loop {
+                while l.is_even() {
+                    l >>= 1;
+                }
+                let next = current_prod.op(self.val[l]);
+                if !f(next) {
+                    break;
+                }
+                current_prod = next;
+                l += 1;
+                if l.is_power_of_two() {
+                    return self.m;
+                }
+            }
+
+            while l < self.n {
+                self.propagate(l);
+                l <<= 1;
+                let next = current_prod.op(self.val[l]);
+                if f(next) {
+                    current_prod = next;
+                    l += 1;
+                }
+            }
+
+            l - self.n
+        }
+
+        /// find min l such that f(prod(l, r)) is true
+        pub fn min_left<F>(&mut self, r: usize, f: F) -> usize
+        where
+            F: Fn(T) -> bool,
+        {
+            let mut r = r + self.n;
+            let mut current_prod = T::e();
+
+            for d in (1..self.depth).rev() {
+                self.propagate((r - 1) >> d);
+            }
+
+            loop {
+                r -= 1;
+                while r > 1 && r.is_odd() {
+                    r >>= 1;
+                }
+                let next = self.val[r].op(current_prod);
+                if !f(next) {
+                    break;
+                }
+                current_prod = next;
+                if r.is_power_of_two() {
+                    return 0;
+                }
+            }
+
+            while r < self.n {
+                self.propagate(r);
+                r = (r << 1) | 1;
+                let next = self.val[r].op(current_prod);
+                if f(next) {
+                    current_prod = next;
+                    r -= 1;
+                }
+            }
+
+            r + 1 - self.n
         }
 
         fn update(&mut self, k: usize) {
