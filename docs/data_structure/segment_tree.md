@@ -144,7 +144,7 @@ pub mod data_structure {
             val.extend(vec![T::e(); n - m]); // 2n
 
             for i in (1..n).rev() {
-                let l = i << 1 + 0;
+                let l = i << 1;
                 let r = (i << 1) + 1;
                 val[i] = val[l].op(val[r]);
             }
@@ -161,13 +161,17 @@ pub mod data_structure {
             self.val[i] = x;
             while i > 1 {
                 i >>= 1;
-                let l = i << 1 + 0;
+                let l = i << 1;
                 let r = (i << 1) + 1;
                 self.val[i] = self.val[l].op(self.val[r]);
             }
         }
 
-        pub fn prod(&self, mut l: usize, mut r: usize) -> T {
+        pub fn prod<R>(&self, range: R) -> T
+        where
+            R: std::ops::RangeBounds<usize>,
+        {
+            let (mut l, mut r) = self.to_half_open_pair(range);
             l += self.n;
             r += self.n;
             let mut v = T::e();
@@ -255,6 +259,24 @@ pub mod data_structure {
             }
 
             r + 1 - self.n
+        }
+
+        /// range = [l, r) と表せる (l, r) を返す
+        fn to_half_open_pair<R>(&self, range: R) -> (usize, usize)
+        where
+            R: std::ops::RangeBounds<usize>,
+        {
+            let l = match range.start_bound() {
+                std::ops::Bound::Included(&l) => l,
+                std::ops::Bound::Excluded(&l) => l + 1,
+                std::ops::Bound::Unbounded => 0,
+            };
+            let r = match range.end_bound() {
+                std::ops::Bound::Included(&r) => r + 1,
+                std::ops::Bound::Excluded(&r) => r,
+                std::ops::Bound::Unbounded => self.m,
+            };
+            (l, r)
         }
     }
 }
