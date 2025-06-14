@@ -4,15 +4,15 @@
 
 ## install
 ```shell
-$ poetry install
+$ uv sync
 ```
 
 ## preview at local
 ```shell
-$ peotry run mkdocs serve
+$ uv run mkdocs serve
 ```
 
 ## deploy to GitHub Pages
 ```shell
-$ poetry run mkdocs gh-deploy
+$ uv run mkdocs gh-deploy
 ```
