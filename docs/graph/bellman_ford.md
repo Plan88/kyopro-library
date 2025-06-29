@@ -96,6 +96,90 @@ struct Graph {
 };
 ```
 
+## Rust
+```rust
+
+    use num::{Bounded, Zero};
+    use num_traits::SaturatingAdd;
+
+    #[derive(Clone, Copy, Debug)]
+    struct Edge<T> {
+        from: usize,
+        to: usize,
+        cost: T,
+    }
+
+    pub struct Graph<T> {
+        n: usize,
+        edges: Vec<Vec<Edge<T>>>,
+    }
+
+    impl<T: Ord + Copy + SaturatingAdd + Bounded + Zero> Graph<T> {
+        pub fn new(n: usize) -> Self {
+            Self {
+                n,
+                edges: vec![vec![]; n],
+            }
+        }
+
+        /// from -> to のコスト cost の有向辺を追加する。
+        pub fn add_edge(&mut self, from: usize, to: usize, cost: T) {
+            self.edges[from].push(Edge { from, to, cost });
+        }
+
+        /// ベルマンフォード法で頂点 s を始点とする各頂点への最短経路を求める。
+        pub fn bellman_ford(&self, s: usize) -> Vec<T> {
+            let mut dist = vec![T::max_value(); self.n];
+            dist[s] = T::zero();
+
+            for _ in 0..self.n - 1 {
+                for i in 0..self.n {
+                    for edge in &self.edges[i] {
+                        dist[edge.to] =
+                            dist[edge.to].min(dist[edge.from].saturating_add(&edge.cost));
+                    }
+                }
+            }
+            dist
+        }
+
+        /// 負閉路が存在するかどうかを判定する。
+        pub fn exists_negative_cycle(&self) -> bool {
+            let dist = self.bellman_ford(0);
+
+            for i in 0..self.n {
+                for edge in &self.edges[i] {
+                    if dist[edge.from].saturating_add(&edge.cost) < dist[edge.to] {
+                        return true;
+                    }
+                }
+            }
+            false
+        }
+
+        /// 頂点 s から到達可能な負閉路が存在するかどうかを判定する。
+        pub fn exists_reachable_negative_cycle(&self, s: usize) -> bool {
+            let dist = self.bellman_ford(s);
+            let reachable = (0..self.n)
+                .map(|i| dist[i] < T::max_value())
+                .collect::<Vec<_>>();
+
+            for i in 0..self.n {
+                for edge in &self.edges[i] {
+                    if reachable[edge.from]
+                        && dist[edge.from].saturating_add(&edge.cost) < dist[edge.to]
+                    {
+                        return true;
+                    }
+                }
+            }
+            false
+        }
+    }
+}
+```
+
 ## Example
 
 - [ARC173 D - Bracket Walk (C++)](https://atcoder.jp/contests/arc173/submissions/52252759)
+- [ABC404 G - Specified Range Sums (Rust)](https://atcoder.jp/contests/abc404/submissions/67182837)
