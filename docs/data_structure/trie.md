@@ -87,13 +87,21 @@ mod data_structure {
         }
     }
 
+    /// 各ノードの集約用
+    #[derive(Default, Debug)]
+    pub struct Agg {
+        /// 自分自身またはその子を終端とするデータの数
+        pub num_data: u32,
+        /// 自分自身を終端とするデータの数
+        pub cnt: u32,
+    }
+
     pub struct Trie<T> {
         /// child[i][j] := i 番目の node の j 番目に対応する node の index
         child: Vec<Vec<Option<usize>>>,
-        /// num_data[i] := i 番目の node とその子のデータの数
-        num_data: Vec<u32>,
-        /// cnt[i] := i 番目の node を終端とするデータの数
-        cnt: Vec<u32>,
+        /// 各 node の集約情報
+        pub aggs: Vec<Agg>,
+        /// 文字の種類数
         size: usize,
         _marker: PhantomData<fn() -> T>,
     }
@@ -119,13 +127,11 @@ mod data_structure {
     impl<T: TrieNode> Trie<T> {
         pub fn new(size: usize) -> Self {
             let child = vec![vec![None; size]];
-            let num_data = vec![0];
-            let cnt = vec![0];
+            let aggs = vec![Agg::default()];
 
             Self {
                 child,
-                num_data,
-                cnt,
+                aggs,
                 size,
                 _marker: PhantomData,
             }
@@ -134,31 +140,40 @@ mod data_structure {
         pub fn insert(&mut self, x: &T) {
             let mut pos = 0;
             let x = x.to_sequence();
+            let mut paths = Vec::with_capacity(x.len() + 1);
+            paths.push(pos);
 
             for xi in x {
                 if self.child[pos][xi].is_none() {
                     self.insert_node(pos, xi);
                 }
 
-                self.num_data[pos] += 1;
+                self.aggs[pos].num_data += 1;
                 pos = self.child[pos][xi].unwrap();
+                paths.push(pos);
             }
-            self.num_data[pos] += 1;
-            self.cnt[pos] += 1;
+            self.aggs[pos].num_data += 1;
+            self.aggs[pos].cnt += 1;
+
+            for &p in paths.iter().rev() {
+                self.update_agg(p);
+            }
         }
+
+        fn update_agg(&mut self, _i: usize) {}
 
         pub fn erase(&mut self, x: &T) -> bool {
             let x = x.to_sequence();
             if let Some(path) = self.get_path(&x) {
                 let last_pos = *path.last().unwrap();
-                if self.cnt[last_pos] == 0 {
+                if self.aggs[last_pos].cnt == 0 {
                     return false;
                 }
 
-                self.cnt[last_pos] -= 1;
+                self.aggs[last_pos].cnt -= 1;
 
                 for pos in path {
-                    self.num_data[pos] -= 1;
+                    self.aggs[pos].num_data -= 1;
                 }
                 return true;
             }
@@ -173,14 +188,14 @@ mod data_structure {
             }
             if let Some(path) = self.get_path(&x) {
                 let last_node = *path.last().unwrap();
-                return self.cnt[last_node] > 0;
+                return self.aggs[last_node].cnt > 0;
             }
             false
         }
 
         /// k (0-indexed) 番目のデータを取得する
         pub fn get_kth(&self, k: usize) -> Option<T> {
-            if self.num_data[0] < k as u32 {
+            if self.aggs[0].num_data < k as u32 + 1 {
                 return None;
             }
 
@@ -191,8 +206,8 @@ mod data_structure {
             loop {
                 for i in 0..self.size {
                     if let Some(next) = self.child[pos][i] {
-                        if cumsum + self.num_data[next] <= k as u32 {
-                            cumsum += self.num_data[next];
+                        if cumsum + self.aggs[next].num_data <= k as u32 {
+                            cumsum += self.aggs[next].num_data;
                         } else {
                             pos = next;
                             v.push(i);
@@ -201,7 +216,7 @@ mod data_structure {
                     }
                 }
 
-                if cumsum + self.cnt[pos] > k as u32 {
+                if cumsum + self.aggs[pos].cnt > k as u32 {
                     break;
                 }
             }
@@ -213,8 +228,7 @@ mod data_structure {
         fn insert_node(&mut self, pos: usize, index: usize) {
             self.child[pos][index] = Some(self.child.len());
             self.child.push(vec![None; self.size]);
-            self.num_data.push(0);
-            self.cnt.push(0);
+            self.aggs.push(Agg::default());
         }
 
         /// x を辿るようなnodeの番号のリストを取得する
@@ -238,17 +252,19 @@ mod data_structure {
 
     impl<T: Unsigned + TrieNode> Trie<T> {
         fn xor(&self, x: &T, b: usize) -> Option<T> {
-            if self.num_data[0] == 0 {
+            if self.aggs[0].num_data == 0 {
                 return None;
             }
             let x = x.to_sequence();
             let mut pos = 0;
             let mut v = vec![];
             for xi in x {
-                if self.child[pos][xi ^ b].is_some_and(|pos| self.num_data[pos] > 0) {
+                if self.child[pos][xi ^ b].is_some_and(|pos| self.aggs[pos].num_data > 0) {
                     v.push(b);
                     pos = self.child[pos][xi ^ b].unwrap();
-                } else if self.child[pos][xi ^ (1 - b)].is_some_and(|pos| self.num_data[pos] > 0) {
+                } else if self.child[pos][xi ^ (1 - b)]
+                    .is_some_and(|pos| self.aggs[pos].num_data > 0)
+                {
                     v.push(1 - b);
                     pos = self.child[pos][xi ^ (1 - b)].unwrap();
                 } else {
