@@ -176,17 +176,16 @@ struct LazySegmentTree {
 
 ## Rust
 ```rust
-pub mod data_structure {
-    use num::Integer;
-
+mod data_structure {
     pub trait Monoid {
         fn e() -> Self;
-        fn op(&self, rhs: Self) -> Self;
+        fn op(&self, rhs: &Self) -> Self;
     }
 
     pub trait Operator<T: Monoid> {
-        fn mapping(&self, x: T) -> T;
-        fn composition(&self, rhs: Self) -> Self;
+        fn mapping(&self, x: &T) -> T;
+        fn composition(&self, rhs: &Self) -> Self;
+        fn id() -> Self;
     }
 
     pub struct LazySegmentTree<T, U> {
@@ -194,18 +193,20 @@ pub mod data_structure {
         m: usize,     // length of original array
         depth: usize, // depth of tree, root's depth is 1
         val: Vec<T>,
-        lazy: Vec<Option<U>>,
+        lazy: Vec<U>,
     }
 
-    impl<T: Monoid + Copy, U: Operator<T> + Copy> LazySegmentTree<T, U> {
+    impl<T: Monoid, U: Operator<T>> LazySegmentTree<T, U> {
         pub fn from_length(n: usize) -> Self {
-            let val = vec![T::e(); n];
-            Self::build(val)
+            Self::build(Self::build_identity_array(n))
         }
 
-        pub fn from_array(v: &[T]) -> Self {
-            let val = v.to_vec();
-            Self::build(val)
+        pub fn from_array(v: Vec<T>) -> Self {
+            Self::build(v)
+        }
+
+        fn build_identity_array(n: usize) -> Vec<T> {
+            (0..n).map(|_| T::e()).collect()
         }
 
         fn build(v: Vec<T>) -> Self {
@@ -213,17 +214,17 @@ pub mod data_structure {
             let n = bit_ceil(m);
             let depth = bit_width(n);
 
-            let mut val = vec![T::e(); n]; // n
+            let mut val = Self::build_identity_array(n); // n
             val.extend(v); // n + m
-            val.extend(vec![T::e(); n - m]); // 2n
+            val.extend(Self::build_identity_array(n - m)); // 2n
 
             for i in (1..n).rev() {
                 let l = i << 1;
                 let r = (i << 1) + 1;
-                val[i] = val[l].op(val[r]);
+                val[i] = val[l].op(&val[r]);
             }
 
-            let lazy = vec![None; n];
+            let lazy = (0..n).map(|_| U::id()).collect();
 
             Self {
                 n,
@@ -234,12 +235,12 @@ pub mod data_structure {
             }
         }
 
-        pub fn get(&mut self, pos: usize) -> T {
+        pub fn get(&mut self, pos: usize) -> &T {
             let i = pos + self.n;
             for d in (1..self.depth).rev() {
                 self.propagate(i >> d);
             }
-            self.val[pos + self.n]
+            &self.val[pos + self.n]
         }
 
         pub fn set(&mut self, pos: usize, x: T) {
@@ -274,12 +275,12 @@ pub mod data_structure {
                 let (l2, r2) = (l, r);
                 while l < r {
                     if (l & 1) == 1 {
-                        self.apply_to_node(l, f);
+                        self.apply_to_node(l, &f);
                         l += 1;
                     }
                     if (r & 1) == 1 {
                         r -= 1;
-                        self.apply_to_node(r, f);
+                        self.apply_to_node(r, &f);
                     }
                     l >>= 1;
                     r >>= 1;
@@ -316,24 +317,24 @@ pub mod data_structure {
             let (mut vl, mut vr) = (T::e(), T::e());
             while l < r {
                 if (l & 1) == 1 {
-                    vl = vl.op(self.val[l]);
+                    vl = vl.op(&self.val[l]);
                     l += 1;
                 }
                 if (r & 1) == 1 {
                     r -= 1;
-                    vr = self.val[r].op(vr);
+                    vr = self.val[r].op(&vr);
                 }
                 l >>= 1;
                 r >>= 1;
             }
 
-            vl.op(vr)
+            vl.op(&vr)
         }
 
         /// find max r such that f(prod(l, r)) is true
         pub fn max_right<F>(&mut self, l: usize, f: F) -> usize
         where
-            F: Fn(T) -> bool,
+            F: Fn(&T) -> bool,
         {
             let mut l = l + self.n;
             let mut current_prod = T::e();
@@ -343,11 +344,11 @@ pub mod data_structure {
             }
 
             loop {
-                while l.is_even() {
+                while (l & 1) == 0 {
                     l >>= 1;
                 }
-                let next = current_prod.op(self.val[l]);
-                if !f(next) {
+                let next = current_prod.op(&self.val[l]);
+                if !f(&next) {
                     break;
                 }
                 current_prod = next;
@@ -360,8 +361,8 @@ pub mod data_structure {
             while l < self.n {
                 self.propagate(l);
                 l <<= 1;
-                let next = current_prod.op(self.val[l]);
-                if f(next) {
+                let next = current_prod.op(&self.val[l]);
+                if f(&next) {
                     current_prod = next;
                     l += 1;
                 }
@@ -373,7 +374,7 @@ pub mod data_structure {
         /// find min l such that f(prod(l, r)) is true
         pub fn min_left<F>(&mut self, r: usize, f: F) -> usize
         where
-            F: Fn(T) -> bool,
+            F: Fn(&T) -> bool,
         {
             let mut r = r + self.n;
             let mut current_prod = T::e();
@@ -384,11 +385,11 @@ pub mod data_structure {
 
             loop {
                 r -= 1;
-                while r > 1 && r.is_odd() {
+                while r > 1 && (r & 1) == 1 {
                     r >>= 1;
                 }
-                let next = self.val[r].op(current_prod);
-                if !f(next) {
+                let next = self.val[r].op(&current_prod);
+                if !f(&next) {
                     break;
                 }
                 current_prod = next;
@@ -400,8 +401,8 @@ pub mod data_structure {
             while r < self.n {
                 self.propagate(r);
                 r = (r << 1) | 1;
-                let next = self.val[r].op(current_prod);
-                if f(next) {
+                let next = self.val[r].op(&current_prod);
+                if f(&next) {
                     current_prod = next;
                     r -= 1;
                 }
@@ -414,26 +415,21 @@ pub mod data_structure {
             if k >= self.n {
                 return;
             }
-            self.val[k] = self.val[k << 1].op(self.val[(k << 1) + 1]);
+            self.val[k] = self.val[k << 1].op(&self.val[(k << 1) + 1]);
         }
 
-        fn apply_to_node(&mut self, k: usize, f: U) {
-            self.val[k] = f.mapping(self.val[k]);
+        fn apply_to_node(&mut self, k: usize, f: &U) {
+            self.val[k] = f.mapping(&self.val[k]);
             if k < self.n {
-                self.lazy[k] = if let Some(lz) = self.lazy[k] {
-                    Some(f.composition(lz))
-                } else {
-                    Some(f)
-                }
+                self.lazy[k] = f.composition(&self.lazy[k]);
             }
         }
 
         fn propagate(&mut self, k: usize) {
-            if let Some(lz) = self.lazy[k].take() {
-                for i in 0..2 {
-                    let j = (k << 1) + i;
-                    self.apply_to_node(j, lz);
-                }
+            let f = std::mem::replace(&mut self.lazy[k], U::id());
+            for i in 0..2 {
+                let ch = (k << 1) + i;
+                self.apply_to_node(ch, &f);
             }
         }
 
