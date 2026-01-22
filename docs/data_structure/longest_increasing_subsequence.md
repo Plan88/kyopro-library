@@ -76,6 +76,52 @@ std::vector<int> longest_increasing_subsequence(std::vector<T> &v, T inf) {
 }
 ```
 
+## Rust
+
+### Narrow ver
+```Rust
+/// Returns the indices of one of the longest increasing subsequences in `a`.
+/// i.e., for the returned vector `res`, `a[res[0]] < a[res[1]] < ... < a[res[res.len() - 1]]`.
+fn longest_increasing_subsequence<T>(a: &[T]) -> Vec<usize>
+where
+    T: Ord,
+{
+    if a.is_empty() {
+        return vec![];
+    }
+
+    let n = a.len();
+    let mut dp: Vec<&T> = Vec::with_capacity(n);
+    let mut index = vec![n; n];
+    let mut prev_index = vec![None; n];
+
+    for (i, ai) in a.iter().enumerate() {
+        let pos = dp.partition_point(|x| *x < ai);
+        if pos == dp.len() {
+            dp.push(ai);
+        } else {
+            dp[pos] = ai;
+        }
+        index[pos] = i;
+        if pos > 0 {
+            prev_index[i] = Some(index[pos - 1]);
+        }
+    }
+
+    let len = dp.len();
+    let mut seq = Vec::with_capacity(len);
+    let mut now = index[len - 1];
+    while let Some(prev) = prev_index[now] {
+        seq.push(now);
+        now = prev;
+    }
+    seq.push(now);
+    seq.reverse();
+    seq
+}
+```
+
+
 ## Examples
 
 - [ABC369 F - Gather Coins (C++)](https://atcoder.jp/contests/abc369/submissions/57342321)
