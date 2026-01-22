@@ -107,12 +107,10 @@ template <class S, S (*op)(S, S), S (*e)()> struct SegmentTree {
 
 ## Rust
 ```rust
-pub mod data_structure {
-    use num::Integer;
-
+mod data_structure {
     pub trait Monoid {
         fn e() -> Self;
-        fn op(&self, rhs: Self) -> Self;
+        fn op(&self, rhs: &Self) -> Self;
     }
 
     pub struct SegmentTree<T> {
@@ -121,15 +119,17 @@ pub mod data_structure {
         val: Vec<T>,
     }
 
-    impl<T: Monoid + Copy> SegmentTree<T> {
+    impl<T: Monoid> SegmentTree<T> {
         pub fn from_length(n: usize) -> Self {
-            let val = vec![T::e(); n];
-            Self::build(val)
+            Self::build(Self::build_identity_array(n))
         }
 
-        pub fn from_array(v: &[T]) -> Self {
-            let val = v.to_vec();
-            Self::build(val)
+        pub fn from_vec(v: Vec<T>) -> Self {
+            Self::build(v)
+        }
+
+        fn build_identity_array(n: usize) -> Vec<T> {
+            (0..n).map(|_| T::e()).collect()
         }
 
         fn build(v: Vec<T>) -> Self {
@@ -139,21 +139,21 @@ pub mod data_structure {
                 n <<= 1;
             }
 
-            let mut val = vec![T::e(); n]; // n
+            let mut val = Self::build_identity_array(n); // n
             val.extend(v); // n + m
-            val.extend(vec![T::e(); n - m]); // 2n
+            val.extend(Self::build_identity_array(n - m)); // 2n
 
             for i in (1..n).rev() {
                 let l = i << 1;
                 let r = (i << 1) + 1;
-                val[i] = val[l].op(val[r]);
+                val[i] = val[l].op(&val[r]);
             }
 
             Self { n, m, val }
         }
 
-        pub fn get(&self, pos: usize) -> T {
-            self.val[pos + self.n]
+        pub fn get(&self, pos: usize) -> &T {
+            &self.val[pos + self.n]
         }
 
         pub fn set(&mut self, pos: usize, x: T) {
@@ -163,7 +163,7 @@ pub mod data_structure {
                 i >>= 1;
                 let l = i << 1;
                 let r = (i << 1) + 1;
-                self.val[i] = self.val[l].op(self.val[r]);
+                self.val[i] = self.val[l].op(&self.val[r]);
             }
         }
 
@@ -177,12 +177,12 @@ pub mod data_structure {
             let mut v = T::e();
             while l < r {
                 if (l & 1) == 1 {
-                    v = v.op(self.val[l]);
+                    v = v.op(&self.val[l]);
                     l += 1;
                 }
                 if (r & 1) == 1 {
                     r -= 1;
-                    v = v.op(self.val[r]);
+                    v = v.op(&self.val[r]);
                 }
                 l >>= 1;
                 r >>= 1;
@@ -194,17 +194,17 @@ pub mod data_structure {
         /// find max r such that f(prod(l, r)) is true
         pub fn max_right<F>(&self, l: usize, f: F) -> usize
         where
-            F: Fn(T) -> bool,
+            F: Fn(&T) -> bool,
         {
             let mut l = l + self.n;
             let mut current_prod = T::e();
 
             loop {
-                while l.is_even() {
+                while (l & 1) == 0 {
                     l >>= 1;
                 }
-                let next = current_prod.op(self.val[l]);
-                if !f(next) {
+                let next = current_prod.op(&self.val[l]);
+                if !f(&next) {
                     break;
                 }
                 current_prod = next;
@@ -216,8 +216,8 @@ pub mod data_structure {
 
             while l < self.n {
                 l <<= 1;
-                let next = current_prod.op(self.val[l]);
-                if f(next) {
+                let next = current_prod.op(&self.val[l]);
+                if f(&next) {
                     current_prod = next;
                     l += 1;
                 }
@@ -229,18 +229,18 @@ pub mod data_structure {
         /// find min l such that f(prod(l, r)) is true
         pub fn min_left<F>(&self, r: usize, f: F) -> usize
         where
-            F: Fn(T) -> bool,
+            F: Fn(&T) -> bool,
         {
             let mut r = r + self.n;
             let mut current_prod = T::e();
 
             loop {
                 r -= 1;
-                while r > 1 && r.is_odd() {
+                while r > 1 && (r & 1) == 1 {
                     r >>= 1;
                 }
-                let next = self.val[r].op(current_prod);
-                if !f(next) {
+                let next = self.val[r].op(&current_prod);
+                if !f(&next) {
                     break;
                 }
                 current_prod = next;
@@ -251,8 +251,8 @@ pub mod data_structure {
 
             while r < self.n {
                 r = (r << 1) | 1;
-                let next = self.val[r].op(current_prod);
-                if f(next) {
+                let next = self.val[r].op(&current_prod);
+                if f(&next) {
                     current_prod = next;
                     r -= 1;
                 }
@@ -277,6 +277,24 @@ pub mod data_structure {
                 std::ops::Bound::Unbounded => self.m,
             };
             (l, r)
+        }
+    }
+
+    impl<T: std::fmt::Debug> std::fmt::Debug for SegmentTree<T> {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            let mut ptr = 1;
+            let mut s = String::new();
+            while ptr < self.n + self.n {
+                s.push_str(
+                    &(ptr..ptr + ptr)
+                        .map(|i| format!("{:?}", self.val[i]))
+                        .collect::<Vec<String>>()
+                        .join(" "),
+                );
+                s.push('\n');
+                ptr += ptr
+            }
+            write!(f, "{}", s)
         }
     }
 }
