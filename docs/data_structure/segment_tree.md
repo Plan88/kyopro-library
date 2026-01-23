@@ -119,13 +119,18 @@ mod data_structure {
         val: Vec<T>,
     }
 
-    impl<T: Monoid> SegmentTree<T> {
-        pub fn from_length(n: usize) -> Self {
-            Self::build(Self::build_identity_array(n))
+    impl<T: Monoid, I> From<I> for SegmentTree<T>
+    where
+        I: IntoIterator<Item = T>,
+    {
+        fn from(iter: I) -> Self {
+            Self::build(iter.into_iter().collect())
         }
+    }
 
-        pub fn from_vec(v: Vec<T>) -> Self {
-            Self::build(v)
+    impl<T: Monoid> SegmentTree<T> {
+        pub fn new(n: usize) -> Self {
+            Self::build(Self::build_identity_array(n))
         }
 
         fn build_identity_array(n: usize) -> Vec<T> {

@@ -196,13 +196,18 @@ mod data_structure {
         lazy: Vec<U>,
     }
 
-    impl<T: Monoid, U: Operator<T>> LazySegmentTree<T, U> {
-        pub fn from_length(n: usize) -> Self {
-            Self::build(Self::build_identity_array(n))
+    impl<T: Monoid, U: Operator<T>, I> From<I> for LazySegmentTree<T, U>
+    where
+        I: IntoIterator<Item = T>,
+    {
+        fn from(iter: I) -> Self {
+            Self::build(iter.into_iter().collect())
         }
+    }
 
-        pub fn from_array(v: Vec<T>) -> Self {
-            Self::build(v)
+    impl<T: Monoid, U: Operator<T>> LazySegmentTree<T, U> {
+        pub fn new(n: usize) -> Self {
+            Self::build(Self::build_identity_array(n))
         }
 
         fn build_identity_array(n: usize) -> Vec<T> {
@@ -240,7 +245,7 @@ mod data_structure {
             for d in (1..self.depth).rev() {
                 self.propagate(i >> d);
             }
-            &self.val[pos + self.n]
+            &self.val[i]
         }
 
         pub fn set(&mut self, pos: usize, x: T) {
