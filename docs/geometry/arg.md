@@ -3,7 +3,7 @@
 ```rust
 /// 偏角ソート用の比較関数
 fn argcmp((x1, y1): (i64, i64), (x2, y2): (i64, i64)) -> std::cmp::Ordering {
-    ((y1, x2) < (0, 0))
+    ((y1, x1) < (0, 0))
         .cmp(&((y2, x2) < (0, 0)))
         .then_with(|| (x2 * y1).cmp(&(x1 * y2)))
 }
