@@ -352,5 +352,19 @@ mod modint {
             write!(f, "{}", self.0)
         }
     }
+
+    impl num::FromPrimitive for ModInt {
+        fn from_usize(n: usize) -> Option<Self> {
+            Some(ModInt::new(n as Int))
+        }
+
+        fn from_u64(n: u64) -> Option<Self> {
+            Some(ModInt::new(n as Int))
+        }
+
+        fn from_i64(n: i64) -> Option<Self> {
+            Some(ModInt::new(n.rem_euclid(Self::MOD as i64) as Int))
+        }
+    }
 }
 ```
