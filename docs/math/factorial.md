@@ -249,6 +249,22 @@ mod modint {
         }
     }
 
+    impl num::Zero for ModInt {
+        fn zero() -> Self {
+            ModInt::new(0)
+        }
+
+        fn is_zero(&self) -> bool {
+            self.0 == 0
+        }
+    }
+
+    impl num::One for ModInt {
+        fn one() -> Self {
+            ModInt::new(1)
+        }
+    }
+
     impl Add<Int> for ModInt {
         type Output = ModInt;
         fn add(self, rhs: Int) -> Self::Output {
