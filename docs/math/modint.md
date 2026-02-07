@@ -128,6 +128,13 @@ pub mod modint {
         }
     }
 
+    impl Neg for ModInt {
+        type Output = ModInt;
+        fn neg(self) -> Self::Output {
+            ModInt::new(Self::MOD - self.0)
+        }
+    }
+
     impl Add for ModInt {
         type Output = ModInt;
         fn add(self, rhs: Self) -> Self::Output {
@@ -229,6 +236,18 @@ pub mod modint {
     impl DivAssign<Int> for ModInt {
         fn div_assign(&mut self, rhs: Int) {
             *self = self.div(rhs);
+        }
+    }
+
+    impl std::fmt::Debug for ModInt {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{}", self.0)
+        }
+    }
+
+    impl std::fmt::Display for ModInt {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{}", self.0)
         }
     }
 }

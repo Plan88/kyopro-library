@@ -103,8 +103,8 @@ using Fact = Factorial<998244353>;
 
 ## Rust
 ```rust
-pub mod modint {
-    use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+mod modint {
+    use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
     type Int = u128;
 
     pub struct Factorial {
@@ -148,6 +148,16 @@ pub mod modint {
         pub fn inv(&self, n: usize) -> ModInt {
             assert!(n > 0);
             self.ifact[n] * self.fact[n - 1]
+        }
+
+        /// n!
+        pub fn fact(&self, n: usize) -> ModInt {
+            self.fact[n]
+        }
+
+        /// 1/n!
+        pub fn ifact(&self, n: usize) -> ModInt {
+            self.ifact[n]
         }
     }
 
@@ -201,6 +211,13 @@ pub mod modint {
 
         pub fn inv(&self) -> Self {
             self.pow(Self::MOD - 2)
+        }
+    }
+
+    impl Neg for ModInt {
+        type Output = ModInt;
+        fn neg(self) -> Self::Output {
+            ModInt::new(Self::MOD - self.0)
         }
     }
 
@@ -305,6 +322,18 @@ pub mod modint {
     impl DivAssign<Int> for ModInt {
         fn div_assign(&mut self, rhs: Int) {
             *self = self.div(rhs);
+        }
+    }
+
+    impl std::fmt::Debug for ModInt {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{}", self.0)
+        }
+    }
+
+    impl std::fmt::Display for ModInt {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            write!(f, "{}", self.0)
         }
     }
 }
