@@ -1,4 +1,4 @@
-## c++
+## C++
 ```c++
 template<long long mod=1000000007>
 struct modint {
@@ -72,7 +72,7 @@ using mint = modint<998244353>;
 ## Rust
 ```Rust
 mod modint {
-    use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+    use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
     type Int = u128;
 
     #[derive(Clone, Copy)]
@@ -124,7 +124,23 @@ mod modint {
         }
 
         pub fn inv(&self) -> Self {
-            self.pow(Self::MOD - 2)
+            let mut b = Self::MOD as i128;
+            let mut u = 1i128;
+            let mut v = 0i128;
+            let mut x = self.0 as i128;
+
+            while b != 0 {
+                let t = x / b;
+                x -= t * b;
+                u -= t * v;
+                std::mem::swap(&mut x, &mut b);
+                std::mem::swap(&mut u, &mut v);
+            }
+            u %= Self::MOD as i128;
+            if u < 0 {
+                u += Self::MOD as i128;
+            }
+            Self(u as Int)
         }
     }
 
