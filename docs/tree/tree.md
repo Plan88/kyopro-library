@@ -1,52 +1,50 @@
 ## Rust
 ```rust
-#[allow(dead_code)]
 mod tree {
     use std::collections::VecDeque;
 
-    use num::{Bounded, Num};
+    type Cost = u64;
 
-    #[derive(Clone, Copy)]
-    struct Edge<T: Ord + Copy + Num + Bounded> {
+    struct Edge {
         from: usize,
         to: usize,
-        cost: T,
+        cost: Cost,
     }
 
+    #[derive(Clone, Copy)]
     struct SubTreeInfo {
         n_child: usize,
+        depth: usize,
+        par: Option<usize>,
     }
 
-    pub struct Tree<T: Ord + Copy + Num + Bounded> {
+    pub struct Tree {
         n: usize,
-        edges: Vec<Vec<Edge<T>>>,
-        depth: Vec<usize>,
-        n_child: Vec<usize>,
-        par: Vec<Option<usize>>,
+        edges: Vec<Vec<Edge>>,
+        subtree: Vec<SubTreeInfo>,
     }
 
-    impl<T: Ord + Copy + Num + Bounded> Tree<T> {
+    impl Tree {
         pub fn new(n: usize) -> Self {
-            let edges = vec![vec![]; n];
-            let depth = vec![0; n];
-            let n_child = vec![1; n];
-            let par = vec![None; n];
+            let edges = (0..n).map(|_| vec![]).collect();
+            let subtree = vec![
+                SubTreeInfo {
+                    n_child: 0,
+                    depth: 0,
+                    par: None,
+                };
+                n
+            ];
 
-            Self {
-                n,
-                edges,
-                depth,
-                n_child,
-                par,
-            }
+            Self { n, edges, subtree }
         }
 
-        pub fn add_edge(&mut self, from: usize, to: usize, cost: T) {
+        pub fn add_edge(&mut self, from: usize, to: usize, cost: Cost) {
             self.add_directed_edge(from, to, cost);
             self.add_directed_edge(to, from, cost);
         }
 
-        fn add_directed_edge(&mut self, from: usize, to: usize, cost: T) {
+        fn add_directed_edge(&mut self, from: usize, to: usize, cost: Cost) {
             let edge = Edge { from, to, cost };
             self.edges[from].push(edge);
         }
@@ -56,36 +54,40 @@ mod tree {
         }
 
         fn dfs(&mut self, v: usize, par: usize, depth: usize) -> SubTreeInfo {
-            self.depth[v] = depth;
-
+            let mut subtree = SubTreeInfo {
+                n_child: 1,
+                depth,
+                par: Some(par),
+            };
             let m = self.edges[v].len();
             for i in 0..m {
-                let edge = self.edges[v][i];
+                let edge = &self.edges[v][i];
                 if edge.to == par {
                     continue;
                 }
                 let info = self.dfs(edge.to, v, depth + 1);
-                self.n_child[v] += info.n_child;
-                self.par[edge.to] = Some(v);
+                subtree.n_child += info.n_child;
             }
 
-            SubTreeInfo {
-                n_child: self.n_child[v],
-            }
+            self.subtree[v] = subtree;
+            subtree
         }
 
+        /// 木の重心を求める
         pub fn get_centroid(&self) -> Vec<usize> {
             let mut c = vec![];
             for i in 0..self.n {
                 let mut flag = true;
-                if self.n - self.n_child[i] > self.n / 2 {
+                if self.n - self.subtree[i].n_child > self.n / 2 {
                     flag = false;
                 }
                 for edge in self.edges[i].iter() {
-                    if self.par[i].is_some() && self.par[i].unwrap() == edge.to {
+                    if let Some(par) = self.subtree[i].par
+                        && par == edge.to
+                    {
                         continue;
                     }
-                    if self.n_child[edge.to] > self.n / 2 {
+                    if self.subtree[edge.to].n_child > self.n / 2 {
                         flag = false;
                         break;
                     }
@@ -97,18 +99,26 @@ mod tree {
             c
         }
 
-        pub fn calc_diameter(&self) -> T {
+        /// 木の直径を求める
+        /// 木の直径とその両端の頂点を返す
+        pub fn calc_diameter(&self) -> (Cost, usize, usize) {
             let r = self
-                .depth
+                .subtree
                 .iter()
                 .enumerate()
-                .fold((0, 0), |cur, (i, &d)| if cur.1 > d { (i, d) } else { cur })
+                .fold((0, 0), |cur, (i, &tree)| {
+                    if cur.1 > tree.depth {
+                        (i, tree.depth)
+                    } else {
+                        cur
+                    }
+                })
                 .0;
 
-            let mut dist = vec![T::max_value(); self.n];
+            let mut dist = vec![0; self.n];
             let mut q = VecDeque::new();
-            q.push_back((r, T::zero()));
-            dist[r] = T::zero();
+            q.push_back((r, 0));
+            dist[r] = 0;
 
             while let Some((v, cost)) = q.pop_front() {
                 for edge in self.edges[v].iter() {
@@ -120,7 +130,17 @@ mod tree {
                 }
             }
 
-            dist.into_iter().max().unwrap()
+            let v = dist
+                .iter()
+                .enumerate()
+                .fold(
+                    (0, 0),
+                    |cur, (i, &cost)| {
+                        if cur.1 < cost { (i, cost) } else { cur }
+                    },
+                )
+                .0;
+            (dist[v], r, v)
         }
     }
 }
