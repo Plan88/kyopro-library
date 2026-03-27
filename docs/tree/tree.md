@@ -107,7 +107,7 @@ mod tree {
                 .iter()
                 .enumerate()
                 .fold((0, 0), |cur, (i, &tree)| {
-                    if cur.1 > tree.depth {
+                    if cur.1 < tree.depth {
                         (i, tree.depth)
                     } else {
                         cur
@@ -115,17 +115,17 @@ mod tree {
                 })
                 .0;
 
-            let mut dist = vec![0; self.n];
+            let mut dist = vec![Cost::MAX; self.n];
             let mut q = VecDeque::new();
-            q.push_back((r, 0));
+            q.push_back(r);
             dist[r] = 0;
 
-            while let Some((v, cost)) = q.pop_front() {
+            while let Some(v) = q.pop_front() {
                 for edge in self.edges[v].iter() {
-                    let cost = cost + edge.cost;
+                    let cost = dist[v] + edge.cost;
                     if cost < dist[edge.to] {
                         dist[edge.to] = cost;
-                        q.push_back((edge.to, cost));
+                        q.push_back(edge.to);
                     }
                 }
             }
