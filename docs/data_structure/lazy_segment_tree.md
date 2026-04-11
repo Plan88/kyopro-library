@@ -480,3 +480,66 @@ mod data_structure {
 
 ## Example
 - [029 - Long Bricks（★5） (Rust)](https://atcoder.jp/contests/typical90/submissions/55437201)
+- 区間等差数列加算更新、区間和クエリ
+```rust
+
+struct S {
+    len: i64,
+    sum: i64,
+    idx_sum: i64,
+}
+
+struct F {
+    a: i64,
+    b: i64,
+}
+
+impl F {
+    /// 区間 [l, ..] に初項 a0, 公差 d の等差数列を足す作用を作る
+    /// 項数は segment tree の apply する区間で指定する
+    fn arithmetic(a0: i64, d: i64, l: usize) -> Self {
+        Self {
+            a: a0 - d * l as i64,
+            b: d,
+        }
+    }
+}
+
+impl data_structure::Monoid for S {
+    fn e() -> Self {
+        Self {
+            len: 0,
+            sum: 0,
+            idx_sum: 0,
+        }
+    }
+
+    fn op(&self, rhs: &Self) -> Self {
+        Self {
+            len: self.len + rhs.len,
+            sum: self.sum + rhs.sum,
+            idx_sum: self.idx_sum + rhs.idx_sum,
+        }
+    }
+}
+
+impl data_structure::Operator<S> for F {
+    fn mapping(&self, x: &S) -> S {
+        S {
+            len: x.len,
+            sum: x.sum + self.a * x.len + self.b * x.idx_sum,
+            idx_sum: x.idx_sum,
+        }
+    }
+
+    fn composition(&self, rhs: &Self) -> Self {
+        Self {
+            a: self.a + rhs.a,
+            b: self.b + rhs.b,
+        }
+    }
+
+    fn id() -> Self {
+        Self { a: 0, b: 0 }
+    }
+}````
